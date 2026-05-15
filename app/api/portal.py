@@ -26,12 +26,20 @@ templates = Jinja2Templates(directory=str(_templates_dir))
 
 @router.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def homepage(request: Request, db: AsyncSession = Depends(get_db)):
-    voices_count = (await db.execute(
+    voices = (await db.execute(
         select(Resource).where(Resource.type == "voice", Resource.is_active == True)  # noqa: E712
+    )).scalars().all()
+    char_count = (await db.execute(
+        select(Resource).where(Resource.type == "character_pack", Resource.is_active == True)  # noqa: E712
+    )).scalars().all()
+    bg_count = (await db.execute(
+        select(Resource).where(Resource.type == "background_pack", Resource.is_active == True)  # noqa: E712
     )).scalars().all()
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "voices_count": len(voices_count),
+        "voices_count": len(voices),
+        "character_count": len(char_count),
+        "background_count": len(bg_count),
     })
 
 
@@ -48,6 +56,11 @@ async def login_page(request: Request):
 @router.get("/register", response_class=HTMLResponse, include_in_schema=False)
 async def register_page(request: Request):
     return templates.TemplateResponse("user_register.html", {"request": request})
+
+
+@router.get("/resources", response_class=HTMLResponse, include_in_schema=False)
+async def resources_page(request: Request):
+    return templates.TemplateResponse("resources.html", {"request": request})
 
 
 @router.get("/console", response_class=HTMLResponse, include_in_schema=False)
@@ -95,6 +108,7 @@ async def list_resources(
             "description": r.description,
             "tags": json.loads(r.tags) if r.tags else [],
             "preview_url": r.preview_url,
+            "download_url": r.download_url,
         }
         for r in rows
     ]

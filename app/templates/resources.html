@@ -1,0 +1,126 @@
+{% extends "site_base.html" %}
+{% block title %}资源下载 · Shinsekai Resource Station{% endblock %}
+{% block content %}
+<section class="container">
+  <h1 style="font-size:1.6rem; font-weight:700; margin-bottom:0.3rem;">📦 资源下载</h1>
+  <p style="color:var(--muted); margin-bottom:0.5rem; font-size:0.9rem;">社区贡献的角色包与背景包资源。资源由社区成员上传分享，请自行甄别适用性。</p>
+
+  <div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.5rem; align-items:center;">
+    <input type="text" id="search" class="input" style="max-width:260px;" placeholder="搜索资源名称..." oninput="filter()">
+    <div style="display:flex; gap:0.5rem;">
+      <button class="tab-btn active" data-type="" onclick="setType(this, '')">全部</button>
+      <button class="tab-btn" data-type="character_pack" onclick="setType(this, 'character_pack')">🎭 角色包</button>
+      <button class="tab-btn" data-type="background_pack" onclick="setType(this, 'background_pack')">🖼️ 背景包</button>
+    </div>
+  </div>
+
+  <div id="resource-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+    <p style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--muted);">🌸 加载中…</p>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<style>
+.tab-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  border: 1.5px solid rgba(212,120,142,0.25);
+  background: rgba(255,255,255,0.5);
+  color: var(--pink-dark);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab-btn.active {
+  background: var(--pink);
+  color: #fff;
+  border-color: var(--pink);
+}
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.4rem 1.1rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+  color: #fff; text-decoration: none;
+  transition: all 0.2s;
+  width: 100%; justify-content: center; box-sizing: border-box;
+}
+.dl-btn:hover { opacity: 0.85; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,120,142,0.25); }
+.meta-row { display:flex; flex-wrap:wrap; gap:0.4rem 0.8rem; font-size:0.73rem; color:var(--muted); }
+.password-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.73rem;
+  background: rgba(212,120,142,0.08);
+  color: var(--pink-dark);
+  font-family: monospace;
+}
+</style>
+<script>
+let allResources = [];
+let activeType = '';
+
+async function load() {
+  try {
+    const [chars, bgs] = await Promise.all([
+      fetch('/api/resources?type=character_pack').then(r => r.json()),
+      fetch('/api/resources?type=background_pack').then(r => r.json()),
+    ]);
+    allResources = [...chars, ...bgs];
+    render(allResources);
+  } catch(e) { console.error(e); }
+}
+
+function setType(btn, type) {
+  activeType = type;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filter();
+}
+
+function filter() {
+  const q = document.getElementById('search').value.toLowerCase();
+  let items = allResources;
+  if (activeType) items = items.filter(r => r.type === activeType);
+  if (q) items = items.filter(r =>
+    r.display_name.toLowerCase().includes(q) ||
+    r.resource_id.toLowerCase().includes(q) ||
+    (r.description || '').toLowerCase().includes(q)
+  );
+  render(items);
+}
+
+function typeLabel(t) {
+  return t === 'character_pack' ? '🎭 角色包' : '🖼️ 背景包';
+}
+
+function render(items) {
+  const grid = document.getElementById('resource-grid');
+  if (!items.length) {
+    grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--muted);">🌸 暂无匹配资源</p>';
+    return;
+  }
+  grid.innerHTML = items.map(r => {
+    const meta = (typeof r.tags === 'object' && !Array.isArray(r.tags)) ? r.tags : {};
+    return `
+    <div class="card" style="padding:1.2rem; display:flex; flex-direction:column; gap:0.65rem;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <span style="font-size:0.7rem; padding:0.15rem 0.6rem; border-radius:9999px; background:rgba(212,120,142,0.1); color:var(--pink-dark);">${typeLabel(r.type)}</span>
+        ${meta.time ? `<span style="font-size:0.7rem; color:var(--muted);">${meta.time}</span>` : ''}
+      </div>
+      <h3 style="font-size:1.02rem; color:var(--text); line-height:1.3; margin:0;">${r.display_name}</h3>
+      <p style="font-size:0.8rem; color:var(--muted); line-height:1.55; flex:1; margin:0;">${r.description || ''}</p>
+      <div class="meta-row">
+        ${meta.uploader ? `<span>👤 ${meta.uploader}</span>` : ''}
+        ${meta.password ? `<span>🔑 <span class="password-badge">${meta.password}</span></span>` : ''}
+      </div>
+      <a href="${r.download_url}" class="dl-btn" target="_blank" rel="noopener">⬇ 下载</a>
+    </div>`;
+  }).join('');
+}
+
+load();
+</script>
+{% endblock %}

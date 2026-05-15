@@ -20,6 +20,7 @@ class Resource(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     tags: Mapped[str] = mapped_column(Text, nullable=False, default="[]")           # JSON array string
     preview_url: Mapped[str | None] = mapped_column(String(500), nullable=True)     # 试听 URL，暂为空
+    download_url: Mapped[str | None] = mapped_column(String(500), nullable=True)    # 下载链接（角色包/背景包）
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
