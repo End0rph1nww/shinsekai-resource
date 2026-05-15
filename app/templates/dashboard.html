@@ -19,8 +19,21 @@
     <div class="text-2xl font-bold" id="stat-total">-</div>
   </div>
 </div>
+
+<h2 class="text-xl font-bold mb-4">用量日志 <span class="text-sm text-slate-400 font-normal">（自动刷新）</span></h2>
+<div class="card overflow-x-auto">
+<table>
+<thead><tr>
+  <th>时间</th><th>用户</th><th>Key</th><th>字符数</th><th>文本预览</th>
+</tr></thead>
+<tbody id="log-table"><tr><td colspan="5" class="text-slate-500 text-center py-8">加载中...</td></tr></tbody>
+</table>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <script>
-async function refresh() {
+async function refreshStats() {
   try {
     const d = await api('/admin/web/api/stats');
     document.getElementById('stat-users').textContent = d.total_users;
@@ -29,7 +42,25 @@ async function refresh() {
     document.getElementById('stat-total').textContent = d.total_chars;
   } catch(e) { console.error(e); }
 }
-refresh();
-setInterval(refresh, 5000);
+
+async function loadLogs() {
+  try {
+    const logs = await api('/admin/web/api/logs?limit=200');
+    const tbody = document.getElementById('log-table');
+    tbody.innerHTML = logs.map(l => `
+      <tr>
+        <td class="text-slate-400 whitespace-nowrap">${new Date(l.created_at).toLocaleString('zh-CN')}</td>
+        <td>${l.nickname}<br><span class="text-xs text-slate-500">${l.email}</span></td>
+        <td class="font-mono text-xs text-slate-400">${l.key_prefix}...</td>
+        <td class="font-mono">${l.chars}</td>
+        <td class="text-slate-400 max-w-xs truncate">${l.text_preview || '-'}</td>
+      </tr>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+refreshStats();
+loadLogs();
+setInterval(refreshStats, 5000);
+setInterval(loadLogs, 10000);
 </script>
 {% endblock %}

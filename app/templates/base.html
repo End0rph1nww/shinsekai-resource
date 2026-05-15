@@ -66,10 +66,11 @@ function showToast(msg, ok = true) {
 }
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, { headers: { 'Content-Type': 'application/json', ...(opts.headers||{}) }, ...opts });
+  const res = await fetch(path, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...(opts.headers||{}) }, ...opts });
   if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.detail || '请求失败'); }
   return res.json();
 }
 </script>
+{% block scripts %}{% endblock %}
 </body>
 </html>

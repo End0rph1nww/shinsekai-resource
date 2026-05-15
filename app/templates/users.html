@@ -22,7 +22,9 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
 let topupUserId = null;
 function openTopup(id) { topupUserId = id; document.getElementById('topup-modal').classList.remove('hidden'); }
