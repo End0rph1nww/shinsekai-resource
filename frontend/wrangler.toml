@@ -1,0 +1,6 @@
+name = "shinsekai-resource"
+main = "src/worker.js"
+compatibility_date = "2026-05-16"
+
+[env.production]
+vars = { BACKEND_URL = "http://your-vps-ip:8765" }
