@@ -1,0 +1,94 @@
+{% extends "site_base.html" %}
+{% block title %}语音库 - 新世界资源共享站{% endblock %}
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-2">语音库</h1>
+  <p class="text-slate-400 mb-6">浏览可用的 Voice ID，选中后复制到你的请求参数中使用</p>
+
+  <!-- 搜索和筛选 -->
+  <div class="flex flex-wrap gap-3 mb-6">
+    <input type="text" id="search" class="input max-w-xs" placeholder="搜索 Voice ID 或名称..." oninput="filter()">
+    <div id="tag-filters" class="flex flex-wrap gap-2"></div>
+  </div>
+
+  <!-- 卡片网格 -->
+  <div id="voice-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="col-span-full text-center py-12 text-slate-500">加载中...</div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+let allVoices = [];
+let allTags = new Set();
+
+async function load() {
+  try {
+    const res = await fetch('/api/resources?type=voice');
+    allVoices = await res.json();
+    allVoices.forEach(v => {
+      if (v.tags && Array.isArray(v.tags)) v.tags.forEach(t => allTags.add(t));
+    });
+    renderTags();
+    render(allVoices);
+  } catch(e) { console.error(e); }
+}
+
+function renderTags() {
+  const el = document.getElementById('tag-filters');
+  const all = Array.from(allTags).sort();
+  el.innerHTML = all.map(t => `<button onclick="filterByTag('${t}')" class="px-2.5 py-0.5 rounded-full text-xs border border-slate-600 text-slate-300 hover:border-indigo-400 hover:text-indigo-300 transition">${t}</button>`).join('');
+}
+
+function filter() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = allVoices.filter(v =>
+    v.resource_id.toLowerCase().includes(q) || v.display_name.toLowerCase().includes(q)
+  );
+  render(filtered);
+}
+
+function filterByTag(tag) {
+  document.getElementById('search').value = tag;
+  filter();
+}
+
+function copyId(id) {
+  navigator.clipboard.writeText(id).then(() => {
+    showToast('已复制: ' + id);
+  });
+}
+
+function render(voices) {
+  const grid = document.getElementById('voice-grid');
+  if (!voices.length) {
+    grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">暂无结果</div>';
+    return;
+  }
+  grid.innerHTML = voices.map(v => `
+    <div class="card p-4 hover:border-indigo-500/50 transition cursor-pointer" onclick="copyId('${v.resource_id}')">
+      <div class="flex items-start justify-between mb-2">
+        <h3 class="font-bold font-mono text-indigo-300">${v.resource_id}</h3>
+        <span class="text-xs text-slate-500">点击复制</span>
+      </div>
+      <p class="text-sm text-slate-400 mb-2">${v.display_name || v.resource_id}</p>
+      <p class="text-xs text-slate-500 mb-3">${v.description || ''}</p>
+      <div class="flex flex-wrap gap-1">
+        ${(v.tags||[]).map(t => `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-700 text-slate-300">${t}</span>`).join('')}
+      </div>
+      ${v.preview_url ? `<audio controls class="mt-3 w-full h-8" src="${v.preview_url}"></audio>` : ''}
+    </div>
+  `).join('');
+}
+
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.className = 'fixed bottom-6 right-6 px-4 py-3 rounded-lg text-sm font-medium shadow-lg z-50 bg-emerald-600 text-white';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 2000);
+}
+
+load();
+</script>
+{% endblock %}

@@ -9,6 +9,18 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
 
+    # 上游代理配置（服务端专用，不暴露给用户）
+    upstream_base_url: str = "https://api.minimaxi.com/v1"
+    upstream_api_key: str = ""
+    upstream_group_id: str = ""   # MiniMax GroupId，可选
+    proxy_timeout: float = 60.0
+
+    # 我们签发的 API Key 前缀
+    api_key_prefix: str = "sk-sn-"
+
+    # 管理后台 Token
+    admin_token: str = "change-me-admin-token"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

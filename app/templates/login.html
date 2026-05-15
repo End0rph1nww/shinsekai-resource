@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理后台登录 - 新世界资源共享站</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { background: #0f172a; color: #e2e8f0; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+<div class="w-full max-w-sm">
+  <div class="text-center mb-6">
+    <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">新世界 ADM</h1>
+    <p class="text-sm text-slate-400 mt-2">管理后台登录</p>
+  </div>
+  <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+    {% if error %}
+    <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 rounded-lg mb-4 text-sm">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="/admin/web/login">
+      <label class="block text-sm text-slate-400 mb-1">Admin Token</label>
+      <input type="password" name="token" class="w-full bg-slate-900 border border-slate-600 text-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-4" placeholder="请输入管理 Token" required>
+      <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg py-2.5 font-medium hover:opacity-90 transition">登录</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

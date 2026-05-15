@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}用户管理 - 管理后台{% endblock %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">用户管理</h2>
+<div class="card overflow-x-auto">
+<table>
+<thead><tr>
+  <th>ID</th><th>邮箱</th><th>昵称</th><th>余额</th><th>用量</th><th>状态</th><th>注册时间</th><th>操作</th>
+</tr></thead>
+<tbody id="user-table"><tr><td colspan="8" class="text-slate-500 text-center py-8">加载中...</td></tr></tbody>
+</table>
+</div>
+
+<!-- Topup Modal -->
+<div id="topup-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+  <div class="card p-6 w-full max-w-sm mx-4">
+    <h3 class="text-lg font-bold mb-3">充值</h3>
+    <input type="number" id="topup-amount" class="input mb-3" placeholder="充值字符数" min="100">
+    <div class="flex gap-2 justify-end">
+      <button onclick="closeTopup()" class="px-4 py-2 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600">取消</button>
+      <button onclick="doTopup()" class="btn-primary btn-sm">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let topupUserId = null;
+function openTopup(id) { topupUserId = id; document.getElementById('topup-modal').classList.remove('hidden'); }
+function closeTopup() { document.getElementById('topup-modal').classList.add('hidden'); topupUserId = null; }
+
+async function doTopup() {
+  const amount = parseInt(document.getElementById('topup-amount').value);
+  if (!amount || amount <= 0) return showToast('请输入有效金额', false);
+  try {
+    await api('/admin/web/api/users/' + topupUserId + '/topup', { method: 'POST', body: JSON.stringify({amount}) });
+    showToast('充值成功');
+    closeTopup();
+    loadUsers();
+  } catch(e) { showToast(e.message, false); }
+}
+
+async function toggleUser(id) {
+  try {
+    await api('/admin/web/api/users/' + id + '/toggle', { method: 'POST' });
+    loadUsers();
+  } catch(e) { showToast(e.message, false); }
+}
+
+async function loadUsers() {
+  try {
+    const users = await api('/admin/web/api/users');
+    const tbody = document.getElementById('user-table');
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.id}</td>
+        <td>${u.email}</td>
+        <td>${u.nickname}</td>
+        <td class="font-mono">${u.balance.toLocaleString()}</td>
+        <td class="font-mono">${u.used_total.toLocaleString()}</td>
+        <td><span class="badge ${u.is_active ? 'badge-green' : 'badge-red'}">${u.is_active ? '正常' : '禁用'}</span></td>
+        <td class="text-slate-400">${new Date(u.created_at).toLocaleDateString('zh-CN')}</td>
+        <td>
+          <button onclick="openTopup(${u.id})" class="btn-primary btn-sm mr-1">充值</button>
+          <button onclick="toggleUser(${u.id})" class="${u.is_active ? 'btn-danger' : 'btn-primary'} btn-sm">${u.is_active ? '禁用' : '启用'}</button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { showToast(e.message, false); }
+}
+loadUsers();
+</script>
+{% endblock %}

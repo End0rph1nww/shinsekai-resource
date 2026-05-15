@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}新世界程序资源共享站{% endblock %}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        surface: { 700: '#1e293b', 800: '#1a2236', 900: '#151d2e' }
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { background: #0f172a; color: #e2e8f0; }
+  .card { background: linear-gradient(135deg, #1e293b 0%, #1a2236 100%); border: 1px solid #334155; border-radius: 0.75rem; }
+  .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 0.5rem 1.25rem; border-radius: 0.5rem; font-weight: 500; transition: opacity 0.2s; display: inline-block; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-outline { border: 1px solid #6366f1; color: #a5b4fc; padding: 0.5rem 1.25rem; border-radius: 0.5rem; font-weight: 500; transition: all 0.2s; display: inline-block; }
+  .btn-outline:hover { background: rgba(99,102,241,0.1); }
+  .input { background: #1e293b; border: 1px solid #475569; color: #e2e8f0; padding: 0.5rem 0.75rem; border-radius: 0.5rem; width: 100%; }
+  .input:focus { outline: none; border-color: #818cf8; box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-slate-700/50">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/" class="text-lg font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">新世界资源共享站</a>
+    <div class="flex items-center gap-4 text-sm">
+      <a href="/" class="text-slate-300 hover:text-white transition">首页</a>
+      <a href="/voices" class="text-slate-300 hover:text-white transition">语音库</a>
+      <span id="nav-auth" class="flex items-center gap-2">
+        <a href="/login" class="text-slate-400 hover:text-white transition">登录</a>
+        <a href="/register" class="btn-primary text-sm">注册</a>
+      </span>
+      <span id="nav-user" class="hidden items-center gap-2">
+        <a href="/console" class="text-indigo-400 hover:text-indigo-300 transition">控制台</a>
+        <button onclick="logout()" class="text-slate-400 hover:text-red-400 transition text-sm">登出</button>
+      </span>
+    </div>
+  </div>
+</nav>
+<main class="flex-1">{% block content %}{% endblock %}</main>
+<footer class="border-t border-slate-700/50 py-6 text-center text-xs text-slate-500">
+  © 2026 新世界程序资源共享站 · Powered by FastAPI
+</footer>
+
+<script>
+function checkAuth() {
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    document.getElementById('nav-auth').classList.add('hidden');
+    document.getElementById('nav-user').classList.remove('hidden');
+  }
+}
+checkAuth();
+
+function logout() {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  window.location.href = '/';
+}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
