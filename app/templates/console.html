@@ -1,54 +1,54 @@
 {% extends "site_base.html" %}
-{% block title %}控制台 - 新世界资源共享站{% endblock %}
+{% block title %}控制台 · Shinsekai Resource Station{% endblock %}
 {% block content %}
-<section class="max-w-4xl mx-auto px-4 py-8">
-  <h1 class="text-2xl font-bold mb-6">用户控制台</h1>
+<section class="container">
+  <h1 style="font-size:1.6rem; font-weight:700; margin-bottom:1.5rem;">⚙ 用户控制台</h1>
 
-  <!-- 余额卡片 -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-    <div class="card p-5">
-      <div class="text-sm text-slate-400 mb-1">剩余余额</div>
-      <div class="text-2xl font-bold text-emerald-400" id="info-balance">-</div>
-      <div class="text-xs text-slate-500 mt-1">字符</div>
+  <!-- 余额 -->
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:2rem;">
+    <div class="card" style="padding:1.25rem;">
+      <p style="font-size:0.8rem; color:var(--muted);">剩余余额</p>
+      <p style="font-size:1.6rem; font-weight:700; color:#6a8a4a;" id="info-balance">-</p>
+      <p style="font-size:0.7rem; color:var(--muted);">字符</p>
     </div>
-    <div class="card p-5">
-      <div class="text-sm text-slate-400 mb-1">累计用量</div>
-      <div class="text-2xl font-bold" id="info-used">-</div>
-      <div class="text-xs text-slate-500 mt-1">字符</div>
+    <div class="card" style="padding:1.25rem;">
+      <p style="font-size:0.8rem; color:var(--muted);">累计用量</p>
+      <p style="font-size:1.6rem; font-weight:700;" id="info-used">-</p>
+      <p style="font-size:0.7rem; color:var(--muted);">字符</p>
     </div>
-    <div class="card p-5">
-      <div class="text-sm text-slate-400 mb-1">账户状态</div>
-      <div class="text-2xl font-bold text-green-400" id="info-status">-</div>
+    <div class="card" style="padding:1.25rem;">
+      <p style="font-size:0.8rem; color:var(--muted);">账户状态</p>
+      <p style="font-size:1.6rem; font-weight:700;" id="info-status">-</p>
     </div>
   </div>
 
   <!-- BASE URL -->
-  <div class="card p-5 mb-8">
-    <div class="text-sm text-slate-400 mb-2">API 接入地址</div>
-    <div class="flex items-center gap-3">
-      <code class="bg-slate-900 px-3 py-2 rounded-lg text-indigo-300 flex-1 text-sm" id="info-base-url">{{ request.base_url }}</code>
-      <button onclick="navigator.clipboard.writeText('{{ request.base_url }}');showToast('已复制')" class="btn-primary btn-sm whitespace-nowrap">复制</button>
+  <div class="card" style="padding:1.25rem; margin-bottom:1.5rem;">
+    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">API 接入地址</p>
+    <div style="display:flex; gap:0.75rem; align-items:center;">
+      <code class="code-inline" style="flex:1; word-break:break-all;">{{ request.base_url }}</code>
+      <button onclick="navigator.clipboard.writeText('{{ request.base_url }}');toast('已复制')" class="btn btn-primary btn-sm">复制</button>
     </div>
-    <div class="text-xs text-slate-500 mt-2">TTS 端点：<code class="text-indigo-400" id="info-tts-url">{{ request.base_url }}v1/t2a_v2</code></div>
+    <p style="font-size:0.75rem; color:var(--muted); margin-top:0.5rem;">TTS 端点：<code class="code-inline">{{ request.base_url }}v1/t2a_v2</code></p>
   </div>
 
   <!-- API Keys -->
-  <div class="card p-5">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-bold">API Keys</h2>
-      <button onclick="createKey()" class="btn-primary btn-sm">+ 创建 Key</button>
+  <div class="card" style="padding:1.25rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <h2 style="font-size:1.1rem; font-weight:700;">API Keys</h2>
+      <button onclick="createKey()" class="btn btn-primary btn-sm">+ 创建 Key</button>
     </div>
-    <div id="keys-list" class="text-sm text-slate-500">请先登录</div>
+    <div id="keys-list" style="font-size:0.85rem; color:var(--muted);">请先登录</div>
   </div>
 
-  <!-- 新建 Key 结果 Modal -->
-  <div id="key-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-    <div class="card p-6 w-full max-w-md mx-4">
-      <h3 class="text-lg font-bold mb-2">API Key 已创建</h3>
-      <p class="text-xs text-red-400 mb-3">这是唯一一次显示完整 Key，请立即复制保存！</p>
-      <input type="text" id="new-key-text" class="input mb-3 font-mono text-sm" readonly onclick="this.select();navigator.clipboard.writeText(this.value)">
-      <div class="flex justify-end">
-        <button onclick="closeKeyModal()" class="btn-primary btn-sm">知道了</button>
+  <!-- Key Modal -->
+  <div id="key-modal" style="display:none; position:fixed; inset:0; z-index:100; align-items:center; justify-content:center; background:rgba(0,0,0,0.35);">
+    <div class="card" style="padding:1.5rem; max-width:460px; width:90%;">
+      <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:0.5rem;">API Key 已创建</h3>
+      <p style="font-size:0.8rem; color:#d47878; margin-bottom:0.75rem;">⚠ 这是唯一一次显示完整 Key，请立即复制保存！</p>
+      <input type="text" id="new-key-text" class="input" style="font-family:monospace; font-size:0.8rem; margin-bottom:0.75rem;" readonly onclick="this.select();navigator.clipboard.writeText(this.value)">
+      <div style="text-align:right;">
+        <button onclick="closeKeyModal()" class="btn btn-primary btn-sm">知道了</button>
       </div>
     </div>
   </div>
@@ -72,6 +72,7 @@ async function loadInfo() {
     document.getElementById('info-balance').textContent = me.balance.toLocaleString();
     document.getElementById('info-used').textContent = me.used_total.toLocaleString();
     document.getElementById('info-status').textContent = me.is_active ? '正常' : '已禁用';
+    document.getElementById('info-status').style.color = me.is_active ? '#6a8a4a' : '#d47878';
   } catch(e) { console.error(e); }
 }
 
@@ -79,16 +80,16 @@ async function loadKeys() {
   try {
     const keys = await apiAuth('/keys');
     const el = document.getElementById('keys-list');
-    if (!keys.length) { el.innerHTML = '<p class="text-slate-500">暂无 API Key，点击上方按钮创建</p>'; return; }
+    if (!keys.length) { el.innerHTML = '<p style="color:var(--muted);">暂无 API Key，点击上方按钮创建</p>'; return; }
     el.innerHTML = keys.map(k => `
-      <div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:0.7rem 0; border-bottom:1px solid rgba(212,120,142,0.12);">
         <div>
-          <span class="font-mono text-sm text-slate-300">${k.key_prefix}...</span>
-          <span class="text-xs text-slate-500 ml-2">${k.name || ''}</span>
-          <span class="badge ${k.is_active ? 'text-green-400' : 'text-red-400'} ml-2">${k.is_active ? '活跃' : '已撤销'}</span>
-          <br><span class="text-xs text-slate-500">创建于 ${new Date(k.created_at).toLocaleDateString('zh-CN')}</span>
+          <span style="font-family:monospace; font-size:0.85rem;">${k.key_prefix}...</span>
+          <span style="font-size:0.75rem; color:var(--muted); margin-left:0.5rem;">${k.name || ''}</span>
+          <span class="badge ${k.is_active ? 'badge-active' : 'badge-inactive'}" style="margin-left:0.5rem;">${k.is_active ? '活跃' : '已撤销'}</span>
+          <br><span style="font-size:0.7rem; color:var(--muted);">创建于 ${new Date(k.created_at).toLocaleDateString('zh-CN')}</span>
         </div>
-        ${k.is_active ? `<button onclick="revokeKey(${k.id})" class="text-red-400 hover:text-red-300 text-sm">撤销</button>` : ''}
+        ${k.is_active ? `<button onclick="revokeKey(${k.id})" style="background:none; border:none; color:#d47878; cursor:pointer; font-size:0.8rem;">撤销</button>` : ''}
       </div>`).join('');
   } catch(e) { console.error(e); }
 }
@@ -98,28 +99,24 @@ async function createKey() {
   try {
     const data = await apiAuth('/keys', { method: 'POST', body: JSON.stringify({name}) });
     document.getElementById('new-key-text').value = data.key;
-    document.getElementById('key-modal').classList.remove('hidden');
+    document.getElementById('key-modal').style.display = 'flex';
     loadKeys();
-  } catch(e) { showToast(e.message, false); }
+  } catch(e) { toast(e.message, false); }
 }
-
-function closeKeyModal() { document.getElementById('key-modal').classList.add('hidden'); }
+function closeKeyModal() { document.getElementById('key-modal').style.display = 'none'; }
 
 async function revokeKey(id) {
   if (!confirm('确定撤销此 Key？')) return;
-  try { await apiAuth('/keys/' + id, { method: 'DELETE' }); loadKeys(); showToast('Key 已撤销'); }
-  catch(e) { showToast(e.message, false); }
+  try { await apiAuth('/keys/' + id, { method: 'DELETE' }); loadKeys(); toast('Key 已撤销'); }
+  catch(e) { toast(e.message, false); }
 }
 
-function showToast(msg, ok = true) {
+function toast(msg, ok=true) {
   const el = document.createElement('div');
-  el.className = 'fixed bottom-6 right-6 px-4 py-3 rounded-lg text-sm font-medium shadow-lg z-50 ' + (ok ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white');
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 2500);
+  el.className = 'toast ' + (ok ? 'toast-ok' : 'toast-err');
+  el.textContent = msg; document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity 0.3s'; setTimeout(()=>el.remove(),300); }, 2500);
 }
-
-loadInfo();
-loadKeys();
+loadInfo(); loadKeys();
 </script>
 {% endblock %}

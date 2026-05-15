@@ -1,69 +1,25 @@
 {% extends "site_base.html" %}
-{% block title %}新世界程序资源共享站{% endblock %}
+{% block title %}Shinsekai Resource Station{% endblock %}
 {% block content %}
 <!-- Hero -->
-<section class="text-center py-16 px-4">
-  <h1 class="text-4xl md:text-5xl font-extrabold mb-4">
-    <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">新世界程序资源共享站</span>
-  </h1>
-  <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-8">
-    面向 Shinsekai 用户的自助 TTS API 代理服务 — 注册即用，按字符计费，透明可控。
+<section style="text-align:center; padding:4.5rem 1.5rem 3rem; position:relative;">
+  <h1 class="hero-title">Shinsekai Resource Station</h1>
+  <p style="font-size:0.95rem; color:var(--muted); max-width:600px; margin:0.85rem auto 1.25rem; line-height:1.8;">
+    Shinsekai 开源项目的资源共享站<br>
+    提供音色库、角色库等资源存储与 TTS API 代理，服务 Shinsekai 桌面助手的开发与测试
   </p>
-  <div class="flex justify-center gap-3">
-    <a href="/register" class="btn-primary text-lg px-6 py-2.5">立即注册</a>
-    <a href="/voices" class="btn-outline text-lg px-6 py-2.5">浏览语音库</a>
+  <p style="font-size:0.82rem; color:var(--muted); max-width:540px; margin:0 auto 1.5rem; line-height:1.7;">
+    本站为社区公益性质，仅收取维持服务的必要费用<br>
+    所有收入用于覆盖上游 API 成本与服务器开销，不作商业运营
+  </p>
+  <div style="display:flex; justify-content:center; gap:0.75rem;">
+    <a href="/register" class="btn btn-primary" style="padding:0.65rem 2rem; font-size:1rem;">立即注册</a>
+    <a href="/voices" class="btn btn-outline" style="padding:0.65rem 2rem; font-size:1rem;">浏览语音库</a>
   </div>
-  <div class="mt-6 text-sm text-slate-500">已有 <span class="text-indigo-400 font-bold">{{ voices_count }}</span> 个 Voice ID 可用</div>
-</section>
-
-<!-- 三步接入 -->
-<section class="max-w-5xl mx-auto px-4 py-12">
-  <h2 class="text-2xl font-bold text-center mb-10">三步接入</h2>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="card p-6 text-center">
-      <div class="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center mx-auto mb-4">
-        <span class="text-xl font-bold text-indigo-400">1</span>
-      </div>
-      <h3 class="font-bold mb-2">注册账号</h3>
-      <p class="text-sm text-slate-400">用邮箱注册，获得账户和初始余额</p>
-    </div>
-    <div class="card p-6 text-center">
-      <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4">
-        <span class="text-xl font-bold text-purple-400">2</span>
-      </div>
-      <h3 class="font-bold mb-2">创建 API Key</h3>
-      <p class="text-sm text-slate-400">在控制台一键生成 API Key，绑定到你的客户端</p>
-    </div>
-    <div class="card p-6 text-center">
-      <div class="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center mx-auto mb-4">
-        <span class="text-xl font-bold text-pink-400">3</span>
-      </div>
-      <h3 class="font-bold mb-2">开始调用</h3>
-      <p class="text-sm text-slate-400">设置 BASE URL 为本站地址，开始 TTS 合成</p>
-    </div>
-  </div>
-</section>
-
-<!-- 代码示例 -->
-<section class="max-w-3xl mx-auto px-4 pb-16">
-  <h2 class="text-2xl font-bold text-center mb-6">快速开始</h2>
-  <div class="card p-4">
-    <div class="text-xs text-slate-500 mb-2">Python 调用示例</div>
-    <pre class="bg-slate-950 rounded-lg p-4 overflow-x-auto text-sm text-slate-300"><code>import httpx
-
-resp = httpx.post(
-    "<span id="base-url-demo">{{ request.base_url }}v1/t2a_v2</span>",
-    headers={"Authorization": "Bearer sk-sn-YOUR_API_KEY"},
-    json={
-        "model": "speech-01-turbo",
-        "text": "你好，这是一段测试语音。",
-        "voice_setting": {"voice_id": "female-shaonv", "speed": 1.0},
-    },
-)
-data = resp.json()  # 返回含 base64 音频的 JSON</code></pre>
-  </div>
-  <div class="text-center mt-6">
-    <a href="/docs" class="text-indigo-400 hover:text-indigo-300 text-sm">查看完整 API 文档 →</a>
-  </div>
+  <p style="margin-top:2rem; font-size:0.85rem; color:var(--muted);">
+    🌸 已有 <strong style="color:var(--pink-dark);">{{ voices_count }}</strong> 个 Voice ID 可供调用<br>
+    📋 角色卡资源即将上线，敬请期待
+  </p>
+  <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); font-size:1.4em; opacity:0.6;">🌸</div>
 </section>
 {% endblock %}

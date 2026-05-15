@@ -1,20 +1,22 @@
 {% extends "site_base.html" %}
-{% block title %}注册 - 新世界资源共享站{% endblock %}
+{% block title %}注册 · Shinsekai Resource Station{% endblock %}
 {% block content %}
-<section class="max-w-sm mx-auto px-4 py-16">
-  <h1 class="text-2xl font-bold text-center mb-6">用户注册</h1>
-  <div class="card p-6">
-    <div id="error-box" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 rounded-lg mb-4 text-sm"></div>
-    <form id="reg-form" onsubmit="doRegister(event)">
-      <label class="block text-sm text-slate-400 mb-1">邮箱</label>
-      <input type="email" id="email" class="input mb-4" placeholder="your@email.com" required>
-      <label class="block text-sm text-slate-400 mb-1">昵称（可选）</label>
-      <input type="text" id="nickname" class="input mb-4" placeholder="怎么称呼你">
-      <label class="block text-sm text-slate-400 mb-1">密码</label>
-      <input type="password" id="password" class="input mb-4" placeholder="至少8位" minlength="8" required>
-      <button type="submit" class="w-full btn-primary">注册</button>
+<section style="max-width:380px; margin:0 auto; padding:4rem 1.5rem;">
+  <h1 style="text-align:center; font-size:1.5rem; font-weight:700; margin-bottom:1.5rem;">用户注册</h1>
+  <div class="card" style="padding:1.75rem;">
+    <div id="error-box" style="display:none; padding:0.6rem 0.9rem; border-radius:0.5rem; margin-bottom:1rem; font-size:0.85rem; background:rgba(220,120,120,0.12); border:1px solid rgba(200,100,100,0.3); color:#b05050;"></div>
+    <form onsubmit="doRegister(event)">
+      <label style="font-size:0.85rem; color:var(--muted); display:block; margin-bottom:0.3rem;">邮箱</label>
+      <input type="email" id="email" class="input" style="margin-bottom:1rem;" placeholder="your@email.com" required>
+      <label style="font-size:0.85rem; color:var(--muted); display:block; margin-bottom:0.3rem;">昵称（可选）</label>
+      <input type="text" id="nickname" class="input" style="margin-bottom:1rem;" placeholder="怎么称呼你">
+      <label style="font-size:0.85rem; color:var(--muted); display:block; margin-bottom:0.3rem;">密码</label>
+      <input type="password" id="password" class="input" style="margin-bottom:1.25rem;" placeholder="至少8位" minlength="8" required>
+      <button type="submit" class="btn btn-primary" style="width:100%;">注册</button>
     </form>
-    <p class="text-sm text-slate-500 text-center mt-4">已有账号？<a href="/login" class="text-indigo-400">去登录</a></p>
+    <p style="text-align:center; font-size:0.85rem; color:var(--muted); margin-top:1rem;">
+      已有账号？<a href="/login" style="color:var(--pink-deep);">去登录</a>
+    </p>
   </div>
 </section>
 {% endblock %}
@@ -22,7 +24,8 @@
 <script>
 async function doRegister(e) {
   e.preventDefault();
-  document.getElementById('error-box').classList.add('hidden');
+  const box = document.getElementById('error-box');
+  box.style.display = 'none';
   try {
     const res = await fetch('/auth/register', {
       method: 'POST',
@@ -34,8 +37,8 @@ async function doRegister(e) {
       })
     });
     if (!res.ok) { const d = await res.json(); throw new Error(d.detail || '注册失败'); }
-    // 注册成功后自动登录
-    const loginRes = await fetch('/auth/login', {
+    // 注册后自动登录
+    const lr = await fetch('/auth/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -43,15 +46,11 @@ async function doRegister(e) {
         password: document.getElementById('password').value
       })
     });
-    const data = await loginRes.json();
+    const data = await lr.json();
     localStorage.setItem('access_token', data.access_token);
     localStorage.setItem('refresh_token', data.refresh_token);
     window.location.href = '/console';
-  } catch(e) {
-    const el = document.getElementById('error-box');
-    el.textContent = e.message;
-    el.classList.remove('hidden');
-  }
+  } catch(e) { box.textContent = e.message; box.style.display = 'block'; }
 }
 </script>
 {% endblock %}

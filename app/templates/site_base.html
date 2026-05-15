@@ -1,66 +1,170 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="dark">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}新世界程序资源共享站{% endblock %}</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  darkMode: 'class',
-  theme: {
-    extend: {
-      colors: {
-        surface: { 700: '#1e293b', 800: '#1a2236', 900: '#151d2e' }
-      }
-    }
-  }
-}
-</script>
+<title>{% block title %}Shinsekai Resource Station{% endblock %}</title>
 <style>
-  body { background: #0f172a; color: #e2e8f0; }
-  .card { background: linear-gradient(135deg, #1e293b 0%, #1a2236 100%); border: 1px solid #334155; border-radius: 0.75rem; }
-  .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 0.5rem 1.25rem; border-radius: 0.5rem; font-weight: 500; transition: opacity 0.2s; display: inline-block; }
-  .btn-primary:hover { opacity: 0.9; }
-  .btn-outline { border: 1px solid #6366f1; color: #a5b4fc; padding: 0.5rem 1.25rem; border-radius: 0.5rem; font-weight: 500; transition: all 0.2s; display: inline-block; }
-  .btn-outline:hover { background: rgba(99,102,241,0.1); }
-  .input { background: #1e293b; border: 1px solid #475569; color: #e2e8f0; padding: 0.5rem 0.75rem; border-radius: 0.5rem; width: 100%; }
-  .input:focus { outline: none; border-color: #818cf8; box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+  :root {
+    --sakura: #ffb7c5;
+    --pink: #f0a0c0;
+    --pink-deep: #d4788e;
+    --pink-dark: #b0506a;
+    --text: #4a2a38;
+    --muted: #9a6a7c;
+    --soft: #c08090;
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --card-border: rgba(212, 120, 142, 0.2);
+    --input-bg: rgba(255, 255, 255, 0.85);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(170deg, #fff0f5 0%, #ffe4ec 28%, #ffd6e4 52%, #ffe8f0 76%, #fff0f5 100%);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(circle at 10% 15%, rgba(255, 183, 197, 0.45) 0%, transparent 50%),
+      radial-gradient(circle at 90% 55%, rgba(240, 160, 192, 0.4) 0%, transparent 55%),
+      radial-gradient(circle at 50% 82%, rgba(255, 200, 215, 0.35) 0%, transparent 45%),
+      radial-gradient(circle at 72% 8%, rgba(255, 183, 197, 0.4) 0%, transparent 40%);
+  }
+
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255, 245, 250, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212, 120, 142, 0.15);
+    padding: 0.75rem 1.5rem;
+  }
+  nav .inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+  nav .brand {
+    font-size: 1.1rem; font-weight: 800; letter-spacing: 2px;
+    background: linear-gradient(135deg, #e8789a, #d4788e, #c0607a);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  nav a { color: var(--soft); text-decoration: none; font-size: 0.9rem; margin-left: 1.25rem; transition: color 0.2s; }
+  nav a:hover { color: var(--pink-dark); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; position: relative; z-index: 1; }
+
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    box-shadow: 0 2px 16px rgba(180, 80, 100, 0.06);
+  }
+  .card:hover { border-color: rgba(212, 120, 142, 0.4); }
+
+  .btn {
+    display: inline-block; padding: 0.55rem 1.5rem; border-radius: 0.6rem;
+    font-weight: 600; font-size: 0.9rem; text-decoration: none; cursor: pointer;
+    transition: all 0.2s; border: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #e8789a 0%, #d4788e 50%, #c0607a 100%);
+    color: #fff; box-shadow: 0 2px 10px rgba(200, 90, 120, 0.25);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200, 90, 120, 0.35); }
+  .btn-outline {
+    border: 1.5px solid var(--pink-deep); color: var(--pink-dark);
+    background: rgba(255,255,255,0.5);
+  }
+  .btn-outline:hover { background: rgba(212, 120, 142, 0.08); }
+  .btn-sm { padding: 0.35rem 0.9rem; font-size: 0.8rem; }
+
+  .input {
+    width: 100%; padding: 0.6rem 0.85rem; border-radius: 0.6rem;
+    border: 1.5px solid rgba(212,120,142,0.25);
+    background: var(--input-bg); color: var(--text);
+    font-size: 0.9rem; font-family: inherit; transition: border 0.2s;
+  }
+  .input:focus { outline: none; border-color: var(--pink-deep); box-shadow: 0 0 0 3px rgba(212,120,142,0.1); }
+
+  footer {
+    border-top: 1px solid rgba(212,120,142,0.15);
+    padding: 1.5rem; text-align: center; font-size: 0.75rem; color: var(--muted);
+  }
+
+  .badge {
+    display: inline-block; padding: 0.15rem 0.55rem; border-radius: 9999px;
+    font-size: 0.75rem; font-weight: 500;
+  }
+  .badge-active { background: rgba(180,200,140,0.3); color: #6a8a4a; }
+  .badge-inactive { background: rgba(200,140,140,0.3); color: #b06060; }
+
+  .hero-title {
+    font-size: 2.6em; letter-spacing: 4px; font-weight: 800; text-align: center;
+    background: linear-gradient(135deg, #e8789a 0%, #d4788e 50%, #c0607a 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .section-title {
+    font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 2rem;
+    color: var(--pink-dark);
+  }
+
+  .toast {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100;
+    padding: 0.6rem 1.2rem; border-radius: 0.6rem; font-size: 0.85rem;
+    font-weight: 500; color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  }
+  .toast-ok { background: #7ab87a; }
+  .toast-err { background: #d47878; }
+
+  pre.code-block {
+    background: #2d1e24; color: #f0c0d0; border-radius: 0.75rem;
+    padding: 1.25rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.6;
+  }
+  .code-inline {
+    background: rgba(212,120,142,0.1); padding: 0.15rem 0.5rem; border-radius: 0.35rem;
+    font-size: 0.85em; color: var(--pink-dark);
+  }
 </style>
 </head>
-<body class="min-h-screen flex flex-col">
-<nav class="sticky top-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-slate-700/50">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="/" class="text-lg font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">新世界资源共享站</a>
-    <div class="flex items-center gap-4 text-sm">
-      <a href="/" class="text-slate-300 hover:text-white transition">首页</a>
-      <a href="/voices" class="text-slate-300 hover:text-white transition">语音库</a>
-      <span id="nav-auth" class="flex items-center gap-2">
-        <a href="/login" class="text-slate-400 hover:text-white transition">登录</a>
-        <a href="/register" class="btn-primary text-sm">注册</a>
+<body>
+<nav>
+  <div class="inner">
+    <a href="/" class="brand">Shinsekai Resource Station</a>
+    <div>
+      <a href="/">首页</a>
+      <a href="/voices">语音库</a>
+      <span id="nav-auth">
+        <a href="/login">登录</a>
+        <a href="/register" class="btn btn-primary btn-sm" style="margin-left:0.5rem">注册</a>
       </span>
-      <span id="nav-user" class="hidden items-center gap-2">
-        <a href="/console" class="text-indigo-400 hover:text-indigo-300 transition">控制台</a>
-        <button onclick="logout()" class="text-slate-400 hover:text-red-400 transition text-sm">登出</button>
+      <span id="nav-user" style="display:none">
+        <a href="/console">控制台</a>
+        <a href="#" onclick="logout();return false" style="color:var(--muted)">登出</a>
       </span>
     </div>
   </div>
 </nav>
-<main class="flex-1">{% block content %}{% endblock %}</main>
-<footer class="border-t border-slate-700/50 py-6 text-center text-xs text-slate-500">
-  © 2026 新世界程序资源共享站 · Powered by FastAPI
+<main>{% block content %}{% endblock %}</main>
+<footer>
+  <p>🌸 Shinsekai Resource Station · Powered by FastAPI · 2026</p>
 </footer>
 
 <script>
 function checkAuth() {
   const token = localStorage.getItem('access_token');
   if (token) {
-    document.getElementById('nav-auth').classList.add('hidden');
-    document.getElementById('nav-user').classList.remove('hidden');
+    document.getElementById('nav-auth').style.display = 'none';
+    document.getElementById('nav-user').style.display = '';
   }
 }
 checkAuth();
-
 function logout() {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
