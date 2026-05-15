@@ -1,0 +1,188 @@
+{% extends "site_base.html" %}
+{% block title %}账户充值 · Shinsekai Resource Station{% endblock %}
+{% block content %}
+<section class="container" style="max-width:520px;">
+  <h1 style="font-size:1.6rem; font-weight:700; margin-bottom:0.3rem;">💰 账户充值</h1>
+  <p style="color:var(--muted); margin-bottom:1.5rem; font-size:0.9rem;">通过 Stripe 安全支付为账户充值 · 支持银行卡、支付宝</p>
+
+  {% if success %}
+  <div class="card" style="padding:2rem; text-align:center;">
+    <div style="font-size:3rem; margin-bottom:1rem;">✅</div>
+    <h2 style="font-size:1.2rem; color:var(--pink-dark); margin-bottom:0.5rem;">
+      {% if duplicate %}已到账{% else %}充值成功{% endif %}
+    </h2>
+    <p style="color:var(--muted); font-size:0.9rem;">
+      +{{ amount }} 元已到账{% if duplicate %}（重复通知）{% endif %}
+    </p>
+    <a href="/console" class="btn btn-primary" style="margin-top:1.5rem;">前往控制台</a>
+  </div>
+  {% elif error %}
+  <div class="card" style="padding:2rem; text-align:center;">
+    <div style="font-size:3rem; margin-bottom:1rem;">❌</div>
+    <h2 style="font-size:1.2rem; color:#d47878; margin-bottom:0.5rem;">支付失败</h2>
+    <p style="color:var(--muted); font-size:0.9rem;">{{ error }}</p>
+    <a href="/charge" class="btn btn-outline" style="margin-top:1.5rem;">返回重试</a>
+  </div>
+  {% else %}
+  <div class="card" style="padding:1.5rem;">
+    <div id="auth-prompt" style="display:none; text-align:center; padding:2rem 0;">
+      <p style="color:var(--muted); margin-bottom:1rem;">请先登录后充值</p>
+      <a href="/login" class="btn btn-primary">前往登录</a>
+    </div>
+
+    <!-- 金额选择 -->
+    <div id="amount-step">
+      <label style="display:block; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">选择充值金额</label>
+      <div id="amount-presets" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.5rem; margin-bottom:1rem;"></div>
+
+      <label style="display:block; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">或输入自定义金额</label>
+      <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:1.5rem;">
+        <input type="number" id="custom-amount" class="input" style="flex:1;" placeholder="自定义金额（元）" min="1" step="0.01" value="10">
+        <span style="color:var(--muted); font-size:0.85rem;">CNY</span>
+      </div>
+
+      <button type="button" id="submit-btn" class="btn btn-primary" style="width:100%; padding:0.75rem; font-size:1rem;">
+        前往支付
+      </button>
+      <p style="text-align:center; font-size:0.7rem; color:var(--muted); margin-top:0.75rem;">
+        🔒 支付由 Stripe 安全处理
+      </p>
+    </div>
+
+    <!-- Stripe 嵌入式结账 -->
+    <div id="checkout-step" style="display:none;">
+      <button type="button" id="back-btn" class="btn btn-outline btn-sm" style="margin-bottom:1rem;">← 返回修改金额</button>
+      <div id="checkout-container"></div>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+.preset-btn {
+  padding: 0.5rem; border-radius: 0.5rem;
+  border: 1.5px solid rgba(212,120,142,0.25);
+  background: rgba(255,255,255,0.5); color: var(--text);
+  font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  text-align: center;
+}
+.preset-btn:hover { border-color: var(--pink-deep); }
+.preset-btn.selected { border-color: var(--pink-deep); background: rgba(212,120,142,0.08); font-weight:600; }
+
+#checkout-container { min-height: 380px; }
+</style>
+<script>
+const presets = [
+  {label: '¥5 小试', value: 5},
+  {label: '¥10 入门', value: 10},
+  {label: '¥20 实惠', value: 20},
+  {label: '¥50 常用', value: 50},
+  {label: '¥100 充裕', value: 100},
+  {label: '¥200 壕', value: 200},
+];
+let selectedAmount = null;
+let stripe = null;
+let embeddedCheckout = null;
+
+function init() {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    document.getElementById('auth-prompt').style.display = '';
+    document.getElementById('amount-step').style.display = 'none';
+    return;
+  }
+
+  stripe = Stripe('pk_test_51TXNlu5idc26fCUVbE8inaUL5WLr78kU7suvBkbZgWAQyVQWQjPrlWvoO2wIuwUa00gEufgCnjeYpUENJm6Q6zvk00ggYEKgdf');
+
+  const grid = document.getElementById('amount-presets');
+  grid.innerHTML = presets.map(p =>
+    `<button type="button" class="preset-btn" data-amount="${p.value}">${p.label}</button>`
+  ).join('');
+
+  grid.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grid.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedAmount = parseFloat(btn.dataset.amount);
+      document.getElementById('custom-amount').value = '';
+    });
+  });
+
+  document.getElementById('custom-amount').addEventListener('input', () => {
+    grid.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('selected'));
+    selectedAmount = null;
+  });
+
+  document.getElementById('submit-btn').addEventListener('click', createSession);
+  document.getElementById('back-btn').addEventListener('click', goBack);
+}
+
+async function createSession() {
+  const amount = selectedAmount || parseFloat(document.getElementById('custom-amount').value);
+  if (!amount || amount < 1) { alert('请选择或输入充值金额（不低于 1 元）'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '正在创建订单...';
+
+  try {
+    const token = localStorage.getItem('access_token');
+    const res = await fetch('/charge/create-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+      },
+      body: JSON.stringify({amount: amount}),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.detail || '创建订单失败');
+      btn.disabled = false;
+      btn.textContent = '前往支付';
+      return;
+    }
+    const data = await res.json();
+
+    // 如果已有旧的 checkout 实例，先销毁
+    if (embeddedCheckout) {
+      embeddedCheckout.destroy();
+      embeddedCheckout = null;
+    }
+
+    // 切换到嵌入式结账
+    document.getElementById('amount-step').style.display = 'none';
+    document.getElementById('checkout-step').style.display = '';
+    document.getElementById('submit-btn').textContent = '前往支付';
+    document.getElementById('submit-btn').disabled = false;
+
+    embeddedCheckout = await stripe.initEmbeddedCheckout({
+      clientSecret: data.client_secret,
+      onComplete: () => {
+        embeddedCheckout = null;
+        window.location.href = '/charge/success';
+      },
+    });
+    embeddedCheckout.mount('#checkout-container');
+  } catch(err) {
+    alert('网络错误: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '前往支付';
+  }
+}
+
+function goBack() {
+  if (embeddedCheckout) {
+    embeddedCheckout.destroy();
+    embeddedCheckout = null;
+  }
+  document.getElementById('amount-step').style.display = '';
+  document.getElementById('checkout-step').style.display = 'none';
+  document.getElementById('checkout-container').innerHTML = '';
+}
+
+init();
+</script>
+{% endblock %}

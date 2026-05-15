@@ -13,6 +13,7 @@ from slowapi.util import get_remote_address
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.keys import router as keys_router
+from app.api.charge import router as charge_router
 from app.api.portal import router as portal_router
 from app.api.proxy import router as proxy_router
 from app.database import Base, engine
@@ -53,6 +54,7 @@ app.add_middleware(
 
 app.include_router(portal_router)   # 最先注册，/ 路由在此
 app.include_router(admin_router)
+app.include_router(charge_router)
 app.include_router(auth_router)
 app.include_router(keys_router)
 app.include_router(proxy_router)

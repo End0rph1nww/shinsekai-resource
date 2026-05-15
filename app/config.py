@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     # 管理后台 Token
     admin_token: str = "change-me-admin-token"
 
+    # Stripe 支付
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    site_url: str = "http://localhost:8765"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
