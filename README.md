@@ -8,7 +8,7 @@ Shinsekai Resource Sharing Station — MiniMax TTS API 代理服务，支持用�
 |------|------|
 | 框架 | FastAPI (async) |
 | ORM | SQLAlchemy 2.0 (async) |
-| 数据库 | SQLite (开发) / PostgreSQL (生产) |
+| 数据库 | SQLite (aiosqlite) |
 | 迁移 | Alembic |
 | 密码 | bcrypt (passlib) |
 | 认证 | JWT (HS256 access + refresh 双令牌) |
