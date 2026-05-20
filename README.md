@@ -1,5 +1,5 @@
 # 新世界程序资源共享站
-
+目前主页:https://shinsekai.end0rph1n.icu/resources
 Shinsekai Resource Sharing Station — MiniMax TTS API 代理服务，支持用户自助注册、余额管理、API Key 管理、Stripe 充值，以及可扩展的资源目录。
 
 ## 架构
